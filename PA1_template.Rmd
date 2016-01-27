@@ -5,6 +5,8 @@ output:
     keep_md: true
 ---
 
+---
+
 ## Loading and preprocessing the data
 ```{r load_preprocess, echo = TRUE}
 # Get current working directory
@@ -41,7 +43,9 @@ procData <- rawData[good,]
 # Discard the dates (factors) with no step data
 procData$date <- factor(procData$date)
 ```
+---
 
+---
 
 ## What is mean total number of steps taken per day?
 ```{r steps_day, echo = TRUE}
@@ -51,38 +55,44 @@ steps <- procData[,1:2]
 # Order by date and steps for further median calculations
 steps<-steps[order(steps$date, steps$steps, decreasing = FALSE),]
 
-## Calculate the total number of steps taken per day
+# Calculate the total number of steps taken per day
 steps <- tapply(steps$steps, steps$date, sum)
 # Storing the dates information
 dates <- row.names(steps)
 
-## Make a histogram of the total number of steps taken each day
+# Make a histogram of the total number of steps taken each day
 # Creating a suitable data.frame for a plot
-dailySteps<-data.frame(dates, as.vector(steps))
-names(dailySteps) <- c('date', 'steps')
+steps<-data.frame(dates, as.vector(steps))
+names(steps) <- c('date', 'steps')
+head(steps)
 
 # Format date for X axis
-dailySteps$date = as.Date(dailySteps[,'date'], format = '%Y-%m-%d')
+steps$date = as.Date(steps[,'date'], format = '%Y-%m-%d')
 
 # Plot
-with(dailySteps, hist(x=date, main = 'Density of Total Steps per Day',
-  col = c('lightgreen'), breaks = 10, ylab = 'Steps', xlab = '2012', freq = F),
-  density=NULL)
+hist(steps$steps, xlab = 'Steps', main = 'Hist Total Steps Across Dates',
+  col = c('lightgreen'))
 
 # Computation of means and medians per day
 means <- tapply(procData$steps, procData$date, mean)
 medians <- tapply(procData$steps, procData$date, median)
+print(head(as.data.frame(means)))
+print(head(as.data.frame(medians)))
 
-# Format objects for better visualization
-print(as.data.frame(means))
-print(as.data.frame(medians))
+# Computation of total mean and median
+mean = mean(steps$steps)
+median = median(steps$steps)
+print(as.data.frame(mean))
+print(as.data.frame(median))
 ```
+---
 
+---
 
 ## What is the average daily activity pattern?
 ```{r steps_interval, echo = TRUE}
-# This function installs the dplyr library if not available on the running
-# environment, whichever the case the includes it in to the libraries pack
+# Install dplyr library if not available on the running environment, whichever
+# the case the includes it in to the libraries pack
 pkgReady <- function(pkgName) is.element(pkgName, installed.packages()[,1])
 if(!pkgReady('dplyr')){install.packages('dplyr')}
 library(dplyr)
@@ -95,7 +105,7 @@ aux <- summarise(aux, average = mean(steps))
 
 # Plot, time series of interval and average number of steps, across all days
 with(aux, plot(interval, average, type="l", xlab = 'Intervals',
-  ylab = 'Average Steps', main = 'Average Steps per Interval, all dates'))
+  ylab = 'Average Steps', main = 'Activity Pattern across Dates'))
 ```
 
 #### Max. number of steps (average) on a Interval
@@ -104,7 +114,9 @@ with(aux, plot(interval, average, type="l", xlab = 'Intervals',
 maxStepsAvg <- filter(aux, average == max(average))
 print(maxStepsAvg)
 ```
+---
 
+---
 
 ## Imputing missing values
 
@@ -116,7 +128,7 @@ print(missNum)
 ```
 
 ```{r imput_nas, echo = TRUE}
-# Fill in all of the missing values with the mean for that 5-minute interval
+# Mean per interval strategy in order to fill the missing values in next steps
 aux <- tapply(procData$steps, procData$interval, mean)
 
 # Format the column types and names for better handling
@@ -140,6 +152,7 @@ for(i in 1:rQty){
 
 # New Raw Data, trim the mean column to fully match the original data
 newRaw = newRaw[, c('steps', 'date','interval')]
+head(newRaw)
 
 # Calculate the total number of steps taken per day
 dailySteps <- tapply(newRaw$steps, newRaw$date, sum)
@@ -155,25 +168,30 @@ names(dailySteps) <- c('date', 'steps')
 dailySteps$date = as.Date(dailySteps[,'date'], format = '%Y-%m-%d')
 
 # Plot
-with(dailySteps, hist(x=date, main = 'Density of Total Steps per Day No NA',
-  col = c('lightgreen'), breaks = 10, ylab = 'Steps', xlab = '2012', freq = F),
-  density=NULL)
+hist(dailySteps$steps, xlab = 'Steps without NAs',
+  main = 'Hist Total Steps Across Dates', col = c('lightgreen'))
 
 # Computation of means and medians per day
 means <- tapply(newRaw$steps, newRaw$date, mean)
 medians <- tapply(newRaw$steps, newRaw$date, median)
+print(head(as.data.frame(means)))
+print(head(as.data.frame(medians)))
 
-# Format objects for better visualization
-print(as.data.frame(means))
-print(as.data.frame(medians))
+# Computation of total mean and median
+mean = mean(dailySteps$steps)
+median = median(dailySteps$steps)
+print(as.data.frame(mean))
+print(as.data.frame(median))
 ```
 #### - These values differ from the ones of the first part of the assignment
 ####   since filling the missing values with Mean Avgs caused an increment on
-####   the total steps per day.
+####   the frequencies.
 #### - The Medians suffered alterations as well, since we had 0s passing the
 ####   middle, now we have some means instead.
 
+---
 
+---
 
 ## Are there differences in activity patterns between weekdays and weekends?
 ```{r panel_daysType, echo = TRUE}
@@ -208,15 +226,15 @@ names(weekdays)[2:3] <- c('mean','dayType')
 names(weekends)[2:3] <- c('mean','dayType')
 aux <- rbind(weekdays, weekends)
 
-# This function installs the ggplot2 library if not available on the running
-# environment, whichever the case the includes it in to the libraries pack
+# Install ggplot2 library if not available on the running environment, whichever
+# the case the includes it in to the libraries pack
 pkgReady <- function(pkgName) is.element(pkgName, installed.packages()[,1])
 if(!pkgReady('ggplot2')){install.packages('ggplot2')}
 library(ggplot2)
 
 #Plot Time series of interval and the average number of steps, across all days
 p = qplot(x=intervals, y=mean, data=aux, geom=c('path','smooth'), color=intervals,
-      facets = dayType ~ ., main = 'Weekday vs Weekend Activity')
+  facets = dayType ~ ., main = 'Weekday vs Weekend Activity')
 print(p)
 ```
 

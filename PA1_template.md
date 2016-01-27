@@ -1,5 +1,7 @@
 # Reproducible Research: Peer Assessment 1
 
+---
+
 ## Loading and preprocessing the data
 
 ```r
@@ -30,7 +32,7 @@ print(paste('Data file read at: ', Sys.time(), sep = ''))
 ```
 
 ```
-## [1] "Data file read at: 2016-01-27 02:02:08"
+## [1] "Data file read at: 2016-01-27 11:13:33"
 ```
 
 ```r
@@ -43,7 +45,9 @@ procData <- rawData[good,]
 # Discard the dates (factors) with no step data
 procData$date <- factor(procData$date)
 ```
+---
 
+---
 
 ## What is mean total number of steps taken per day?
 
@@ -54,23 +58,35 @@ steps <- procData[,1:2]
 # Order by date and steps for further median calculations
 steps<-steps[order(steps$date, steps$steps, decreasing = FALSE),]
 
-## Calculate the total number of steps taken per day
+# Calculate the total number of steps taken per day
 steps <- tapply(steps$steps, steps$date, sum)
 # Storing the dates information
 dates <- row.names(steps)
 
-## Make a histogram of the total number of steps taken each day
+# Make a histogram of the total number of steps taken each day
 # Creating a suitable data.frame for a plot
-dailySteps<-data.frame(dates, as.vector(steps))
-names(dailySteps) <- c('date', 'steps')
+steps<-data.frame(dates, as.vector(steps))
+names(steps) <- c('date', 'steps')
+head(steps)
+```
 
+```
+##         date steps
+## 1 2012-10-02   126
+## 2 2012-10-03 11352
+## 3 2012-10-04 12116
+## 4 2012-10-05 13294
+## 5 2012-10-06 15420
+## 6 2012-10-07 11015
+```
+
+```r
 # Format date for X axis
-dailySteps$date = as.Date(dailySteps[,'date'], format = '%Y-%m-%d')
+steps$date = as.Date(steps[,'date'], format = '%Y-%m-%d')
 
 # Plot
-with(dailySteps, hist(x=date, main = 'Density of Total Steps per Day',
-  col = c('lightgreen'), breaks = 10, ylab = 'Steps', xlab = '2012', freq = F),
-  density=NULL)
+hist(steps$steps, xlab = 'Steps', main = 'Hist Total Steps Across Dates',
+  col = c('lightgreen'))
 ```
 
 ![](PA1_template_files/figure-html/steps_day-1.png)
@@ -79,70 +95,21 @@ with(dailySteps, hist(x=date, main = 'Density of Total Steps per Day',
 # Computation of means and medians per day
 means <- tapply(procData$steps, procData$date, mean)
 medians <- tapply(procData$steps, procData$date, median)
-
-# Format objects for better visualization
-print(as.data.frame(means))
+print(head(as.data.frame(means)))
 ```
 
 ```
-##                 means
-## 2012-10-02  0.4375000
-## 2012-10-03 39.4166667
-## 2012-10-04 42.0694444
-## 2012-10-05 46.1597222
-## 2012-10-06 53.5416667
-## 2012-10-07 38.2465278
-## 2012-10-09 44.4826389
-## 2012-10-10 34.3750000
-## 2012-10-11 35.7777778
-## 2012-10-12 60.3541667
-## 2012-10-13 43.1458333
-## 2012-10-14 52.4236111
-## 2012-10-15 35.2048611
-## 2012-10-16 52.3750000
-## 2012-10-17 46.7083333
-## 2012-10-18 34.9166667
-## 2012-10-19 41.0729167
-## 2012-10-20 36.0937500
-## 2012-10-21 30.6284722
-## 2012-10-22 46.7361111
-## 2012-10-23 30.9652778
-## 2012-10-24 29.0104167
-## 2012-10-25  8.6527778
-## 2012-10-26 23.5347222
-## 2012-10-27 35.1354167
-## 2012-10-28 39.7847222
-## 2012-10-29 17.4236111
-## 2012-10-30 34.0937500
-## 2012-10-31 53.5208333
-## 2012-11-02 36.8055556
-## 2012-11-03 36.7048611
-## 2012-11-05 36.2465278
-## 2012-11-06 28.9375000
-## 2012-11-07 44.7326389
-## 2012-11-08 11.1770833
-## 2012-11-11 43.7777778
-## 2012-11-12 37.3784722
-## 2012-11-13 25.4722222
-## 2012-11-15  0.1423611
-## 2012-11-16 18.8923611
-## 2012-11-17 49.7881944
-## 2012-11-18 52.4652778
-## 2012-11-19 30.6979167
-## 2012-11-20 15.5277778
-## 2012-11-21 44.3993056
-## 2012-11-22 70.9270833
-## 2012-11-23 73.5902778
-## 2012-11-24 50.2708333
-## 2012-11-25 41.0902778
-## 2012-11-26 38.7569444
-## 2012-11-27 47.3819444
-## 2012-11-28 35.3576389
-## 2012-11-29 24.4687500
+##               means
+## 2012-10-02  0.43750
+## 2012-10-03 39.41667
+## 2012-10-04 42.06944
+## 2012-10-05 46.15972
+## 2012-10-06 53.54167
+## 2012-10-07 38.24653
 ```
 
 ```r
-print(as.data.frame(medians))
+print(head(as.data.frame(medians)))
 ```
 
 ```
@@ -153,61 +120,37 @@ print(as.data.frame(medians))
 ## 2012-10-05       0
 ## 2012-10-06       0
 ## 2012-10-07       0
-## 2012-10-09       0
-## 2012-10-10       0
-## 2012-10-11       0
-## 2012-10-12       0
-## 2012-10-13       0
-## 2012-10-14       0
-## 2012-10-15       0
-## 2012-10-16       0
-## 2012-10-17       0
-## 2012-10-18       0
-## 2012-10-19       0
-## 2012-10-20       0
-## 2012-10-21       0
-## 2012-10-22       0
-## 2012-10-23       0
-## 2012-10-24       0
-## 2012-10-25       0
-## 2012-10-26       0
-## 2012-10-27       0
-## 2012-10-28       0
-## 2012-10-29       0
-## 2012-10-30       0
-## 2012-10-31       0
-## 2012-11-02       0
-## 2012-11-03       0
-## 2012-11-05       0
-## 2012-11-06       0
-## 2012-11-07       0
-## 2012-11-08       0
-## 2012-11-11       0
-## 2012-11-12       0
-## 2012-11-13       0
-## 2012-11-15       0
-## 2012-11-16       0
-## 2012-11-17       0
-## 2012-11-18       0
-## 2012-11-19       0
-## 2012-11-20       0
-## 2012-11-21       0
-## 2012-11-22       0
-## 2012-11-23       0
-## 2012-11-24       0
-## 2012-11-25       0
-## 2012-11-26       0
-## 2012-11-27       0
-## 2012-11-28       0
-## 2012-11-29       0
 ```
 
+```r
+# Computation of total mean and median
+mean = mean(steps$steps)
+median = median(steps$steps)
+print(as.data.frame(mean))
+```
+
+```
+##       mean
+## 1 10766.19
+```
+
+```r
+print(as.data.frame(median))
+```
+
+```
+##   median
+## 1  10765
+```
+---
+
+---
 
 ## What is the average daily activity pattern?
 
 ```r
-# This function installs the dplyr library if not available on the running
-# environment, whichever the case the includes it in to the libraries pack
+# Install dplyr library if not available on the running environment, whichever
+# the case the includes it in to the libraries pack
 pkgReady <- function(pkgName) is.element(pkgName, installed.packages()[,1])
 if(!pkgReady('dplyr')){install.packages('dplyr')}
 library(dplyr)
@@ -239,7 +182,7 @@ aux <- summarise(aux, average = mean(steps))
 
 # Plot, time series of interval and average number of steps, across all days
 with(aux, plot(interval, average, type="l", xlab = 'Intervals',
-  ylab = 'Average Steps', main = 'Average Steps per Interval, all dates'))
+  ylab = 'Average Steps', main = 'Activity Pattern across Dates'))
 ```
 
 ![](PA1_template_files/figure-html/steps_interval-1.png)
@@ -259,7 +202,9 @@ print(maxStepsAvg)
 ##      (int)    (dbl)
 ## 1      835 206.1698
 ```
+---
 
+---
 
 ## Imputing missing values
 
@@ -277,7 +222,7 @@ print(missNum)
 
 
 ```r
-# Fill in all of the missing values with the mean for that 5-minute interval
+# Mean per interval strategy in order to fill the missing values in next steps
 aux <- tapply(procData$steps, procData$interval, mean)
 
 # Format the column types and names for better handling
@@ -301,7 +246,20 @@ for(i in 1:rQty){
 
 # New Raw Data, trim the mean column to fully match the original data
 newRaw = newRaw[, c('steps', 'date','interval')]
+head(newRaw)
+```
 
+```
+##         steps       date interval
+## 1   1.7169811 2012-10-01        0
+## 63  0.3396226 2012-10-01        5
+## 128 0.1320755 2012-10-01       10
+## 205 0.1509434 2012-10-01       15
+## 264 0.0754717 2012-10-01       20
+## 327 2.0943396 2012-10-01       25
+```
+
+```r
 # Calculate the total number of steps taken per day
 dailySteps <- tapply(newRaw$steps, newRaw$date, sum)
 # Storing the dates information
@@ -316,9 +274,8 @@ names(dailySteps) <- c('date', 'steps')
 dailySteps$date = as.Date(dailySteps[,'date'], format = '%Y-%m-%d')
 
 # Plot
-with(dailySteps, hist(x=date, main = 'Density of Total Steps per Day No NA',
-  col = c('lightgreen'), breaks = 10, ylab = 'Steps', xlab = '2012', freq = F),
-  density=NULL)
+hist(dailySteps$steps, xlab = 'Steps without NAs',
+  main = 'Hist Total Steps Across Dates', col = c('lightgreen'))
 ```
 
 ![](PA1_template_files/figure-html/imput_nas-1.png)
@@ -327,78 +284,21 @@ with(dailySteps, hist(x=date, main = 'Density of Total Steps per Day No NA',
 # Computation of means and medians per day
 means <- tapply(newRaw$steps, newRaw$date, mean)
 medians <- tapply(newRaw$steps, newRaw$date, median)
-
-# Format objects for better visualization
-print(as.data.frame(means))
+print(head(as.data.frame(means)))
 ```
 
 ```
-##                 means
-## 2012-10-01 37.3825996
-## 2012-10-02  0.4375000
-## 2012-10-03 39.4166667
-## 2012-10-04 42.0694444
-## 2012-10-05 46.1597222
-## 2012-10-06 53.5416667
-## 2012-10-07 38.2465278
-## 2012-10-08 37.3825996
-## 2012-10-09 44.4826389
-## 2012-10-10 34.3750000
-## 2012-10-11 35.7777778
-## 2012-10-12 60.3541667
-## 2012-10-13 43.1458333
-## 2012-10-14 52.4236111
-## 2012-10-15 35.2048611
-## 2012-10-16 52.3750000
-## 2012-10-17 46.7083333
-## 2012-10-18 34.9166667
-## 2012-10-19 41.0729167
-## 2012-10-20 36.0937500
-## 2012-10-21 30.6284722
-## 2012-10-22 46.7361111
-## 2012-10-23 30.9652778
-## 2012-10-24 29.0104167
-## 2012-10-25  8.6527778
-## 2012-10-26 23.5347222
-## 2012-10-27 35.1354167
-## 2012-10-28 39.7847222
-## 2012-10-29 17.4236111
-## 2012-10-30 34.0937500
-## 2012-10-31 53.5208333
-## 2012-11-01 37.3825996
-## 2012-11-02 36.8055556
-## 2012-11-03 36.7048611
-## 2012-11-04 37.3825996
-## 2012-11-05 36.2465278
-## 2012-11-06 28.9375000
-## 2012-11-07 44.7326389
-## 2012-11-08 11.1770833
-## 2012-11-09 37.3825996
-## 2012-11-10 37.3825996
-## 2012-11-11 43.7777778
-## 2012-11-12 37.3784722
-## 2012-11-13 25.4722222
-## 2012-11-14 37.3825996
-## 2012-11-15  0.1423611
-## 2012-11-16 18.8923611
-## 2012-11-17 49.7881944
-## 2012-11-18 52.4652778
-## 2012-11-19 30.6979167
-## 2012-11-20 15.5277778
-## 2012-11-21 44.3993056
-## 2012-11-22 70.9270833
-## 2012-11-23 73.5902778
-## 2012-11-24 50.2708333
-## 2012-11-25 41.0902778
-## 2012-11-26 38.7569444
-## 2012-11-27 47.3819444
-## 2012-11-28 35.3576389
-## 2012-11-29 24.4687500
-## 2012-11-30 37.3825996
+##               means
+## 2012-10-01 37.38260
+## 2012-10-02  0.43750
+## 2012-10-03 39.41667
+## 2012-10-04 42.06944
+## 2012-10-05 46.15972
+## 2012-10-06 53.54167
 ```
 
 ```r
-print(as.data.frame(medians))
+print(head(as.data.frame(medians)))
 ```
 
 ```
@@ -409,69 +309,37 @@ print(as.data.frame(medians))
 ## 2012-10-04  0.00000
 ## 2012-10-05  0.00000
 ## 2012-10-06  0.00000
-## 2012-10-07  0.00000
-## 2012-10-08 34.11321
-## 2012-10-09  0.00000
-## 2012-10-10  0.00000
-## 2012-10-11  0.00000
-## 2012-10-12  0.00000
-## 2012-10-13  0.00000
-## 2012-10-14  0.00000
-## 2012-10-15  0.00000
-## 2012-10-16  0.00000
-## 2012-10-17  0.00000
-## 2012-10-18  0.00000
-## 2012-10-19  0.00000
-## 2012-10-20  0.00000
-## 2012-10-21  0.00000
-## 2012-10-22  0.00000
-## 2012-10-23  0.00000
-## 2012-10-24  0.00000
-## 2012-10-25  0.00000
-## 2012-10-26  0.00000
-## 2012-10-27  0.00000
-## 2012-10-28  0.00000
-## 2012-10-29  0.00000
-## 2012-10-30  0.00000
-## 2012-10-31  0.00000
-## 2012-11-01 34.11321
-## 2012-11-02  0.00000
-## 2012-11-03  0.00000
-## 2012-11-04 34.11321
-## 2012-11-05  0.00000
-## 2012-11-06  0.00000
-## 2012-11-07  0.00000
-## 2012-11-08  0.00000
-## 2012-11-09 34.11321
-## 2012-11-10 34.11321
-## 2012-11-11  0.00000
-## 2012-11-12  0.00000
-## 2012-11-13  0.00000
-## 2012-11-14 34.11321
-## 2012-11-15  0.00000
-## 2012-11-16  0.00000
-## 2012-11-17  0.00000
-## 2012-11-18  0.00000
-## 2012-11-19  0.00000
-## 2012-11-20  0.00000
-## 2012-11-21  0.00000
-## 2012-11-22  0.00000
-## 2012-11-23  0.00000
-## 2012-11-24  0.00000
-## 2012-11-25  0.00000
-## 2012-11-26  0.00000
-## 2012-11-27  0.00000
-## 2012-11-28  0.00000
-## 2012-11-29  0.00000
-## 2012-11-30 34.11321
+```
+
+```r
+# Computation of total mean and median
+mean = mean(dailySteps$steps)
+median = median(dailySteps$steps)
+print(as.data.frame(mean))
+```
+
+```
+##       mean
+## 1 10766.19
+```
+
+```r
+print(as.data.frame(median))
+```
+
+```
+##     median
+## 1 10766.19
 ```
 #### - These values differ from the ones of the first part of the assignment
 ####   since filling the missing values with Mean Avgs caused an increment on
-####   the total steps per day.
+####   the frequencies.
 #### - The Medians suffered alterations as well, since we had 0s passing the
 ####   middle, now we have some means instead.
 
+---
 
+---
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -507,15 +375,15 @@ names(weekdays)[2:3] <- c('mean','dayType')
 names(weekends)[2:3] <- c('mean','dayType')
 aux <- rbind(weekdays, weekends)
 
-# This function installs the ggplot2 library if not available on the running
-# environment, whichever the case the includes it in to the libraries pack
+# Install ggplot2 library if not available on the running environment, whichever
+# the case the includes it in to the libraries pack
 pkgReady <- function(pkgName) is.element(pkgName, installed.packages()[,1])
 if(!pkgReady('ggplot2')){install.packages('ggplot2')}
 library(ggplot2)
 
 #Plot Time series of interval and the average number of steps, across all days
 p = qplot(x=intervals, y=mean, data=aux, geom=c('path','smooth'), color=intervals,
-      facets = dayType ~ ., main = 'Weekday vs Weekend Activity')
+  facets = dayType ~ ., main = 'Weekday vs Weekend Activity')
 print(p)
 ```
 
