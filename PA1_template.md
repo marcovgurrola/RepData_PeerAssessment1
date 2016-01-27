@@ -30,7 +30,7 @@ print(paste('Data file read at: ', Sys.time(), sep = ''))
 ```
 
 ```
-## [1] "Data file read at: 2016-01-26 22:59:14"
+## [1] "Data file read at: 2016-01-26 23:11:54"
 ```
 
 ```r
@@ -546,3 +546,11 @@ qplot(x=intervals, y=mean, data=aux, geom=c('path','smooth'), color=intervals,
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)
+
+```r
+print('We can observe enough differences on the average means per interval')
+```
+
+```
+## [1] "We can observe enough differences on the average means per interval"
+```
