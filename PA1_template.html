@@ -1,0 +1,457 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1404.34">
+  <style type="text/css">
+    p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; line-height: 18.0px; font: 13.0px Courier; color: #333333; -webkit-text-stroke: #333333; background-color: #f5f5f5}
+    p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; line-height: 18.0px; font: 13.0px Courier; color: #333333; -webkit-text-stroke: #333333; background-color: #f5f5f5; min-height: 16.0px}
+    p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; line-height: 18.0px; font: 13.0px Courier; color: #333333; -webkit-text-stroke: #333333; background-color: #ffffff}
+    p.p6 {margin: 0.0px 0.0px 10.0px 0.0px; line-height: 20.0px; font: 14.0px 'Helvetica Neue'; color: #333333; -webkit-text-stroke: #333333}
+    span.s1 {font-kerning: none}
+  </style>
+</head>
+<body>
+<h1 style="margin: 0.0px 0.0px 10.0px 0.0px; line-height: 39.0px; font: 36.0px 'Helvetica Neue'; color: #333333; -webkit-text-stroke: #333333"><span class="s1">Reproducible Research: Peer Assessment 1</span></h1>
+<h2 style="margin: 0.0px 0.0px 10.0px 0.0px; line-height: 33.0px; font: 30.0px 'Helvetica Neue'; color: #333333; -webkit-text-stroke: #333333"><span class="s1">Loading and preprocessing the data</span></h2>
+<p class="p3"><span class="s1"># Get current working directory</span></p>
+<p class="p3"><span class="s1">myPath &lt;- getwd()</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Create the full path for the csv file to be used</span></p>
+<p class="p3"><span class="s1">filePath &lt;- paste(myPath, 'activity.csv', sep = '/')</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Download file in case it doesn't exist</span></p>
+<p class="p3"><span class="s1">if(!file.exists(filePath)){</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span># From https://github.com/rdpeng/RepData_PeerAssessment1, Assigment section</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>url &lt;- 'https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip'</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">  </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span># Destination for the zip to download</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>zipPath &lt;- 'activity.zip'</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span># Start downloading, inform date and time</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>print(paste('Download started at: ', Sys.time(), sep = ''))</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>download.file(url, zipPath, mode = 'wb')</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">  </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span># Unzip the file into a csv</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>unzip(zipPath)</span></p>
+<p class="p3"><span class="s1">}</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Read csv file from local path and inform the date and time of access</span></p>
+<p class="p3"><span class="s1">rawData &lt;- read.csv(filePath)</span></p>
+<p class="p3"><span class="s1">print(paste('Data file read at: ', Sys.time(), sep = ''))</span></p>
+<p class="p5"><span class="s1">## [1] "Data file read at: 2016-01-26 22:59:14"</span></p>
+<p class="p3"><span class="s1"># Process the data into a format suitable, identify observations with step data</span></p>
+<p class="p3"><span class="s1">good &lt;- !is.na(rawData$steps)</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Filter observations with step data (discard missing values)</span></p>
+<p class="p3"><span class="s1">procData &lt;- rawData[good,]</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Discard the dates (factors) with no step data</span></p>
+<p class="p3"><span class="s1">procData$date &lt;- factor(procData$date)</span></p>
+<h2 style="margin: 0.0px 0.0px 10.0px 0.0px; line-height: 33.0px; font: 30.0px 'Helvetica Neue'; color: #333333; -webkit-text-stroke: #333333"><span class="s1">What is mean total number of steps taken per day?</span></h2>
+<p class="p3"><span class="s1"># Only step and date columns are required</span></p>
+<p class="p3"><span class="s1">steps &lt;- procData[,1:2]</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Order by date and steps for further median calculations</span></p>
+<p class="p3"><span class="s1">steps&lt;-steps[order(steps$date, steps$steps, decreasing = FALSE),]</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1">## Calculate the total number of steps taken per day</span></p>
+<p class="p3"><span class="s1">steps &lt;- tapply(steps$steps, steps$date, sum)</span></p>
+<p class="p3"><span class="s1"># Storing the dates information</span></p>
+<p class="p3"><span class="s1">dates &lt;- row.names(steps)</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1">## Make a histogram of the total number of steps taken each day</span></p>
+<p class="p3"><span class="s1"># Creating a suitable data.frame for a plot</span></p>
+<p class="p3"><span class="s1">dailySteps&lt;-data.frame(dates, as.vector(steps))</span></p>
+<p class="p3"><span class="s1">names(dailySteps) &lt;- c('date', 'steps')</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Format date for X axis</span></p>
+<p class="p3"><span class="s1">dailySteps$date = as.Date(dailySteps[,'date'], format = '%Y-%m-%d')</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Plot</span></p>
+<p class="p3"><span class="s1">with(dailySteps, hist(x=date, main = 'Density of Total Steps per Day',</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>col = c('lightgreen'), breaks = 10, ylab = 'Steps', xlab = '2012', freq = F),</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>density=NULL)</span></p>
+<p class="p6"><span class="s1"><img src="file:///unknown.png" alt="unknown.png"></span></p>
+<p class="p3"><span class="s1"># Computation of means and medians per day</span></p>
+<p class="p3"><span class="s1">means &lt;- tapply(procData$steps, procData$date, mean)</span></p>
+<p class="p3"><span class="s1">medians &lt;- tapply(procData$steps, procData$date, median)</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Format objects for better visualization</span></p>
+<p class="p3"><span class="s1">print(as.data.frame(means))</span></p>
+<p class="p5"><span class="s1">## <span class="Apple-converted-space">                </span>means</span></p>
+<p class="p5"><span class="s1">## 2012-10-02<span class="Apple-converted-space">  </span>0.4375000</span></p>
+<p class="p5"><span class="s1">## 2012-10-03 39.4166667</span></p>
+<p class="p5"><span class="s1">## 2012-10-04 42.0694444</span></p>
+<p class="p5"><span class="s1">## 2012-10-05 46.1597222</span></p>
+<p class="p5"><span class="s1">## 2012-10-06 53.5416667</span></p>
+<p class="p5"><span class="s1">## 2012-10-07 38.2465278</span></p>
+<p class="p5"><span class="s1">## 2012-10-09 44.4826389</span></p>
+<p class="p5"><span class="s1">## 2012-10-10 34.3750000</span></p>
+<p class="p5"><span class="s1">## 2012-10-11 35.7777778</span></p>
+<p class="p5"><span class="s1">## 2012-10-12 60.3541667</span></p>
+<p class="p5"><span class="s1">## 2012-10-13 43.1458333</span></p>
+<p class="p5"><span class="s1">## 2012-10-14 52.4236111</span></p>
+<p class="p5"><span class="s1">## 2012-10-15 35.2048611</span></p>
+<p class="p5"><span class="s1">## 2012-10-16 52.3750000</span></p>
+<p class="p5"><span class="s1">## 2012-10-17 46.7083333</span></p>
+<p class="p5"><span class="s1">## 2012-10-18 34.9166667</span></p>
+<p class="p5"><span class="s1">## 2012-10-19 41.0729167</span></p>
+<p class="p5"><span class="s1">## 2012-10-20 36.0937500</span></p>
+<p class="p5"><span class="s1">## 2012-10-21 30.6284722</span></p>
+<p class="p5"><span class="s1">## 2012-10-22 46.7361111</span></p>
+<p class="p5"><span class="s1">## 2012-10-23 30.9652778</span></p>
+<p class="p5"><span class="s1">## 2012-10-24 29.0104167</span></p>
+<p class="p5"><span class="s1">## 2012-10-25<span class="Apple-converted-space">  </span>8.6527778</span></p>
+<p class="p5"><span class="s1">## 2012-10-26 23.5347222</span></p>
+<p class="p5"><span class="s1">## 2012-10-27 35.1354167</span></p>
+<p class="p5"><span class="s1">## 2012-10-28 39.7847222</span></p>
+<p class="p5"><span class="s1">## 2012-10-29 17.4236111</span></p>
+<p class="p5"><span class="s1">## 2012-10-30 34.0937500</span></p>
+<p class="p5"><span class="s1">## 2012-10-31 53.5208333</span></p>
+<p class="p5"><span class="s1">## 2012-11-02 36.8055556</span></p>
+<p class="p5"><span class="s1">## 2012-11-03 36.7048611</span></p>
+<p class="p5"><span class="s1">## 2012-11-05 36.2465278</span></p>
+<p class="p5"><span class="s1">## 2012-11-06 28.9375000</span></p>
+<p class="p5"><span class="s1">## 2012-11-07 44.7326389</span></p>
+<p class="p5"><span class="s1">## 2012-11-08 11.1770833</span></p>
+<p class="p5"><span class="s1">## 2012-11-11 43.7777778</span></p>
+<p class="p5"><span class="s1">## 2012-11-12 37.3784722</span></p>
+<p class="p5"><span class="s1">## 2012-11-13 25.4722222</span></p>
+<p class="p5"><span class="s1">## 2012-11-15<span class="Apple-converted-space">  </span>0.1423611</span></p>
+<p class="p5"><span class="s1">## 2012-11-16 18.8923611</span></p>
+<p class="p5"><span class="s1">## 2012-11-17 49.7881944</span></p>
+<p class="p5"><span class="s1">## 2012-11-18 52.4652778</span></p>
+<p class="p5"><span class="s1">## 2012-11-19 30.6979167</span></p>
+<p class="p5"><span class="s1">## 2012-11-20 15.5277778</span></p>
+<p class="p5"><span class="s1">## 2012-11-21 44.3993056</span></p>
+<p class="p5"><span class="s1">## 2012-11-22 70.9270833</span></p>
+<p class="p5"><span class="s1">## 2012-11-23 73.5902778</span></p>
+<p class="p5"><span class="s1">## 2012-11-24 50.2708333</span></p>
+<p class="p5"><span class="s1">## 2012-11-25 41.0902778</span></p>
+<p class="p5"><span class="s1">## 2012-11-26 38.7569444</span></p>
+<p class="p5"><span class="s1">## 2012-11-27 47.3819444</span></p>
+<p class="p5"><span class="s1">## 2012-11-28 35.3576389</span></p>
+<p class="p5"><span class="s1">## 2012-11-29 24.4687500</span></p>
+<p class="p3"><span class="s1">print(as.data.frame(medians))</span></p>
+<p class="p5"><span class="s1">##<span class="Apple-converted-space">            </span>medians</span></p>
+<p class="p5"><span class="s1">## 2012-10-02 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-03 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-04 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-05 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-06 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-07 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-09 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-10 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-11 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-12 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-13 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-14 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-15 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-16 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-17 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-18 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-19 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-20 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-21 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-22 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-23 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-24 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-25 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-26 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-27 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-28 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-29 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-30 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-10-31 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-02 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-03 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-05 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-06 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-07 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-08 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-11 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-12 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-13 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-15 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-16 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-17 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-18 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-19 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-20 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-21 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-22 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-23 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-24 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-25 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-26 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-27 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-28 <span class="Apple-converted-space">      </span>0</span></p>
+<p class="p5"><span class="s1">## 2012-11-29 <span class="Apple-converted-space">      </span>0</span></p>
+<h2 style="margin: 0.0px 0.0px 10.0px 0.0px; line-height: 33.0px; font: 30.0px 'Helvetica Neue'; color: #333333; -webkit-text-stroke: #333333"><span class="s1">What is the average daily activity pattern?</span></h2>
+<p class="p3"><span class="s1"># This function installs the dplyr library if not available on the running</span></p>
+<p class="p3"><span class="s1"># environment, whichever the case the includes it in to the libraries pack</span></p>
+<p class="p3"><span class="s1">pkgReady &lt;- function(pkgName) is.element(pkgName, installed.packages()[,1])</span></p>
+<p class="p3"><span class="s1">if(!pkgReady('dplyr')){install.packages('dplyr')}</span></p>
+<p class="p3"><span class="s1">library(dplyr)</span></p>
+<p class="p5"><span class="s1">##<span class="Apple-converted-space"> </span></span></p>
+<p class="p5"><span class="s1">## Attaching package: 'dplyr'</span></p>
+<p class="p5"><span class="s1">## The following objects are masked from 'package:stats':</span></p>
+<p class="p5"><span class="s1">##<span class="Apple-converted-space"> </span></span></p>
+<p class="p5"><span class="s1">## <span class="Apple-converted-space">    </span>filter, lag</span></p>
+<p class="p5"><span class="s1">## The following objects are masked from 'package:base':</span></p>
+<p class="p5"><span class="s1">##<span class="Apple-converted-space"> </span></span></p>
+<p class="p5"><span class="s1">## <span class="Apple-converted-space">    </span>intersect, setdiff, setequal, union</span></p>
+<p class="p3"><span class="s1"># Group data by intervals</span></p>
+<p class="p3"><span class="s1">aux &lt;- group_by(procData, interval)</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Calculate average number of steps accross all days</span></p>
+<p class="p3"><span class="s1">aux &lt;- summarise(aux, average = mean(steps))</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Plot, time series of interval and average number of steps, across all days</span></p>
+<p class="p3"><span class="s1">with(aux, plot(interval, average, type="l", xlab = 'Intervals',</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>ylab = 'Average Steps'))</span></p>
+<p class="p6"><span class="s1"><img src="file:///unknown_1.png" alt="unknown_1.png"></span></p>
+<p class="p3"><span class="s1"># Interval across all days in the dataset with maximum number of steps -average</span></p>
+<p class="p3"><span class="s1">maxStepsAvg &lt;- filter(aux, average == max(average))</span></p>
+<p class="p3"><span class="s1">print('Max. number of steps (average) per day and its interval:')</span></p>
+<p class="p5"><span class="s1">## [1] "Max. number of steps (average) per day and its interval:"</span></p>
+<p class="p3"><span class="s1">print(maxStepsAvg)</span></p>
+<p class="p5"><span class="s1">## Source: local data frame [1 x 2]</span></p>
+<p class="p5"><span class="s1">##<span class="Apple-converted-space"> </span></span></p>
+<p class="p5"><span class="s1">## <span class="Apple-converted-space">  </span>interval<span class="Apple-converted-space">  </span>average</span></p>
+<p class="p5"><span class="s1">##<span class="Apple-converted-space">      </span>(int)<span class="Apple-converted-space">    </span>(dbl)</span></p>
+<p class="p5"><span class="s1">## 1<span class="Apple-converted-space">      </span>835 206.1698</span></p>
+<h2 style="margin: 0.0px 0.0px 10.0px 0.0px; line-height: 33.0px; font: 30.0px 'Helvetica Neue'; color: #333333; -webkit-text-stroke: #333333"><span class="s1">Imputing missing values</span></h2>
+<p class="p3"><span class="s1"># Calculate and report the total number of missing values in the dataset</span></p>
+<p class="p3"><span class="s1">missNum = as.numeric(length(good[good == F]))</span></p>
+<p class="p3"><span class="s1">print(paste('Total number of missing values:', missNum, sep = ' '))</span></p>
+<p class="p5"><span class="s1">## [1] "Total number of missing values: 2304"</span></p>
+<p class="p3"><span class="s1"># Fill in all of the missing values with the mean for that 5-minute interval</span></p>
+<p class="p3"><span class="s1">aux &lt;- tapply(procData$steps, procData$interval, mean)</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Format the column types and names for better handling</span></p>
+<p class="p3"><span class="s1">aux &lt;- data.frame(cbind(row.names(aux), as.numeric(aux)))</span></p>
+<p class="p3"><span class="s1">names(aux) &lt;- c('interval', 'mean')</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Merge the raw data with the interval means to create a new dataset</span></p>
+<p class="p3"><span class="s1">newRaw &lt;- merge (rawData, aux, by = c('interval', 'interval'), all.x = T)</span></p>
+<p class="p3"><span class="s1">newRaw &lt;- newRaw[order(newRaw$date, newRaw$interval, decreasing = FALSE),]</span></p>
+<p class="p3"><span class="s1">newRaw$mean &lt;- as.numeric(levels(newRaw$mean))[newRaw$mean]</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Create a new dataset that is equal to the original dataset but without NAs</span></p>
+<p class="p3"><span class="s1"># Store the total number of observations<span class="Apple-converted-space"> </span></span></p>
+<p class="p3"><span class="s1">rQty = nrow(newRaw)</span></p>
+<p class="p3"><span class="s1"># Replace every empty step with the mean</span></p>
+<p class="p3"><span class="s1">for(i in 1:rQty){</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>if(is.na(newRaw$steps[i])){</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">    </span>newRaw$steps[i] = newRaw$mean[i]</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
+<p class="p3"><span class="s1">}</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># New Raw Data, trim the mean column to fully match the original data</span></p>
+<p class="p3"><span class="s1">newRaw = newRaw[, c('steps', 'date','interval')]</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Calculate the total number of steps taken per day</span></p>
+<p class="p3"><span class="s1">dailySteps &lt;- tapply(newRaw$steps, newRaw$date, sum)</span></p>
+<p class="p3"><span class="s1"># Storing the dates information</span></p>
+<p class="p3"><span class="s1">dates &lt;- row.names(dailySteps)</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Make a histogram of the total number of steps taken each day</span></p>
+<p class="p3"><span class="s1"># Creating a suitable data.frame for a plot</span></p>
+<p class="p3"><span class="s1">dailySteps &lt;- data.frame(dates, as.vector(dailySteps))</span></p>
+<p class="p3"><span class="s1">names(dailySteps) &lt;- c('date', 'steps')</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Format date for X axis</span></p>
+<p class="p3"><span class="s1">dailySteps$date = as.Date(dailySteps[,'date'], format = '%Y-%m-%d')</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Plot</span></p>
+<p class="p3"><span class="s1">with(dailySteps, hist(x=date, main = 'Density of Total Steps per Day No NA',</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>col = c('lightgreen'), breaks = 10, ylab = 'Steps', xlab = '2012', freq = F),</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>density=NULL)</span></p>
+<p class="p6"><span class="s1"><img src="file:///unknown_2.png" alt="unknown_2.png"></span></p>
+<p class="p3"><span class="s1"># Computation of means and medians per day</span></p>
+<p class="p3"><span class="s1">means &lt;- tapply(newRaw$steps, newRaw$date, mean)</span></p>
+<p class="p3"><span class="s1">medians &lt;- tapply(newRaw$steps, newRaw$date, median)</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Format objects for better visualization</span></p>
+<p class="p3"><span class="s1">print(as.data.frame(means))</span></p>
+<p class="p5"><span class="s1">## <span class="Apple-converted-space">                </span>means</span></p>
+<p class="p5"><span class="s1">## 2012-10-01 37.3825996</span></p>
+<p class="p5"><span class="s1">## 2012-10-02<span class="Apple-converted-space">  </span>0.4375000</span></p>
+<p class="p5"><span class="s1">## 2012-10-03 39.4166667</span></p>
+<p class="p5"><span class="s1">## 2012-10-04 42.0694444</span></p>
+<p class="p5"><span class="s1">## 2012-10-05 46.1597222</span></p>
+<p class="p5"><span class="s1">## 2012-10-06 53.5416667</span></p>
+<p class="p5"><span class="s1">## 2012-10-07 38.2465278</span></p>
+<p class="p5"><span class="s1">## 2012-10-08 37.3825996</span></p>
+<p class="p5"><span class="s1">## 2012-10-09 44.4826389</span></p>
+<p class="p5"><span class="s1">## 2012-10-10 34.3750000</span></p>
+<p class="p5"><span class="s1">## 2012-10-11 35.7777778</span></p>
+<p class="p5"><span class="s1">## 2012-10-12 60.3541667</span></p>
+<p class="p5"><span class="s1">## 2012-10-13 43.1458333</span></p>
+<p class="p5"><span class="s1">## 2012-10-14 52.4236111</span></p>
+<p class="p5"><span class="s1">## 2012-10-15 35.2048611</span></p>
+<p class="p5"><span class="s1">## 2012-10-16 52.3750000</span></p>
+<p class="p5"><span class="s1">## 2012-10-17 46.7083333</span></p>
+<p class="p5"><span class="s1">## 2012-10-18 34.9166667</span></p>
+<p class="p5"><span class="s1">## 2012-10-19 41.0729167</span></p>
+<p class="p5"><span class="s1">## 2012-10-20 36.0937500</span></p>
+<p class="p5"><span class="s1">## 2012-10-21 30.6284722</span></p>
+<p class="p5"><span class="s1">## 2012-10-22 46.7361111</span></p>
+<p class="p5"><span class="s1">## 2012-10-23 30.9652778</span></p>
+<p class="p5"><span class="s1">## 2012-10-24 29.0104167</span></p>
+<p class="p5"><span class="s1">## 2012-10-25<span class="Apple-converted-space">  </span>8.6527778</span></p>
+<p class="p5"><span class="s1">## 2012-10-26 23.5347222</span></p>
+<p class="p5"><span class="s1">## 2012-10-27 35.1354167</span></p>
+<p class="p5"><span class="s1">## 2012-10-28 39.7847222</span></p>
+<p class="p5"><span class="s1">## 2012-10-29 17.4236111</span></p>
+<p class="p5"><span class="s1">## 2012-10-30 34.0937500</span></p>
+<p class="p5"><span class="s1">## 2012-10-31 53.5208333</span></p>
+<p class="p5"><span class="s1">## 2012-11-01 37.3825996</span></p>
+<p class="p5"><span class="s1">## 2012-11-02 36.8055556</span></p>
+<p class="p5"><span class="s1">## 2012-11-03 36.7048611</span></p>
+<p class="p5"><span class="s1">## 2012-11-04 37.3825996</span></p>
+<p class="p5"><span class="s1">## 2012-11-05 36.2465278</span></p>
+<p class="p5"><span class="s1">## 2012-11-06 28.9375000</span></p>
+<p class="p5"><span class="s1">## 2012-11-07 44.7326389</span></p>
+<p class="p5"><span class="s1">## 2012-11-08 11.1770833</span></p>
+<p class="p5"><span class="s1">## 2012-11-09 37.3825996</span></p>
+<p class="p5"><span class="s1">## 2012-11-10 37.3825996</span></p>
+<p class="p5"><span class="s1">## 2012-11-11 43.7777778</span></p>
+<p class="p5"><span class="s1">## 2012-11-12 37.3784722</span></p>
+<p class="p5"><span class="s1">## 2012-11-13 25.4722222</span></p>
+<p class="p5"><span class="s1">## 2012-11-14 37.3825996</span></p>
+<p class="p5"><span class="s1">## 2012-11-15<span class="Apple-converted-space">  </span>0.1423611</span></p>
+<p class="p5"><span class="s1">## 2012-11-16 18.8923611</span></p>
+<p class="p5"><span class="s1">## 2012-11-17 49.7881944</span></p>
+<p class="p5"><span class="s1">## 2012-11-18 52.4652778</span></p>
+<p class="p5"><span class="s1">## 2012-11-19 30.6979167</span></p>
+<p class="p5"><span class="s1">## 2012-11-20 15.5277778</span></p>
+<p class="p5"><span class="s1">## 2012-11-21 44.3993056</span></p>
+<p class="p5"><span class="s1">## 2012-11-22 70.9270833</span></p>
+<p class="p5"><span class="s1">## 2012-11-23 73.5902778</span></p>
+<p class="p5"><span class="s1">## 2012-11-24 50.2708333</span></p>
+<p class="p5"><span class="s1">## 2012-11-25 41.0902778</span></p>
+<p class="p5"><span class="s1">## 2012-11-26 38.7569444</span></p>
+<p class="p5"><span class="s1">## 2012-11-27 47.3819444</span></p>
+<p class="p5"><span class="s1">## 2012-11-28 35.3576389</span></p>
+<p class="p5"><span class="s1">## 2012-11-29 24.4687500</span></p>
+<p class="p5"><span class="s1">## 2012-11-30 37.3825996</span></p>
+<p class="p3"><span class="s1">print(as.data.frame(medians))</span></p>
+<p class="p5"><span class="s1">## <span class="Apple-converted-space">            </span>medians</span></p>
+<p class="p5"><span class="s1">## 2012-10-01 34.11321</span></p>
+<p class="p5"><span class="s1">## 2012-10-02<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-03<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-04<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-05<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-06<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-07<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-08 34.11321</span></p>
+<p class="p5"><span class="s1">## 2012-10-09<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-10<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-11<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-12<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-13<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-14<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-15<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-16<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-17<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-18<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-19<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-20<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-21<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-22<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-23<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-24<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-25<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-26<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-27<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-28<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-29<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-30<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-10-31<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-01 34.11321</span></p>
+<p class="p5"><span class="s1">## 2012-11-02<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-03<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-04 34.11321</span></p>
+<p class="p5"><span class="s1">## 2012-11-05<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-06<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-07<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-08<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-09 34.11321</span></p>
+<p class="p5"><span class="s1">## 2012-11-10 34.11321</span></p>
+<p class="p5"><span class="s1">## 2012-11-11<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-12<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-13<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-14 34.11321</span></p>
+<p class="p5"><span class="s1">## 2012-11-15<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-16<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-17<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-18<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-19<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-20<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-21<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-22<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-23<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-24<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-25<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-26<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-27<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-28<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-29<span class="Apple-converted-space">  </span>0.00000</span></p>
+<p class="p5"><span class="s1">## 2012-11-30 34.11321</span></p>
+<p class="p3"><span class="s1">print('These values differ from the ones of the first part of the assignment.')</span></p>
+<p class="p5"><span class="s1">## [1] "These values differ from the ones of the first part of the assignment."</span></p>
+<p class="p3"><span class="s1">print('By filling the NAs the total steps per day increased for some days')</span></p>
+<p class="p5"><span class="s1">## [1] "By filling the NAs the total steps per day increased for some days"</span></p>
+<p class="p3"><span class="s1">print('The Medians suffered alterations as well, since we had 0s passing the')</span></p>
+<p class="p5"><span class="s1">## [1] "The Medians suffered alterations as well, since we had 0s passing the"</span></p>
+<p class="p3"><span class="s1">print('middle, now we have some means instead.')</span></p>
+<p class="p5"><span class="s1">## [1] "middle, now we have some means instead."</span></p>
+<h2 style="margin: 0.0px 0.0px 10.0px 0.0px; line-height: 33.0px; font: 30.0px 'Helvetica Neue'; color: #333333; -webkit-text-stroke: #333333"><span class="s1">Are there differences in activity patterns between weekdays and weekends?</span></h2>
+<p class="p3"><span class="s1">#Create a factor with two levels -- "weekday" and "weekend"</span></p>
+<p class="p3"><span class="s1">wd &lt;- weekdays(as.Date(newRaw$date, format = '%Y-%m-%d'), abbreviate = T)</span></p>
+<p class="p3"><span class="s1">wd &lt;- data.frame(sapply (wd, function(x) {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>if(x %in% c('Mon', 'Tue', 'Wed', 'Thu', 'Fri')){</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">    </span>x = 'weekday'</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>else</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">    </span>x = 'weekend'</span></p>
+<p class="p3"><span class="s1">}))</span></p>
+<p class="p3"><span class="s1">names(wd) &lt;- c('dayType')</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Merge the new raw data with the names of the days (weekday, weekend)</span></p>
+<p class="p3"><span class="s1">newRaw &lt;- cbind(newRaw[,-2], wd[,1])</span></p>
+<p class="p3"><span class="s1">names(newRaw)[3] &lt;- 'dayType'</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Separate dayTypes for means computations</span></p>
+<p class="p3"><span class="s1">weekdays &lt;- newRaw[newRaw$dayType == 'weekday',]</span></p>
+<p class="p3"><span class="s1">weekends &lt;- newRaw[newRaw$dayType == 'weekend',]</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Compute Means</span></p>
+<p class="p3"><span class="s1">weekdays &lt;- tapply(weekdays$steps, weekdays$interval, mean)</span></p>
+<p class="p3"><span class="s1">weekends &lt;- tapply(weekends$steps, weekends$interval, mean)</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># Format computed data into a single data.frame</span></p>
+<p class="p3"><span class="s1">intervals &lt;- as.integer(row.names(weekdays))</span></p>
+<p class="p3"><span class="s1">weekdays &lt;- data.frame(intervals, weekdays, replicate(length(intervals), 'weekday'))</span></p>
+<p class="p3"><span class="s1">weekends &lt;- data.frame(intervals, weekends, replicate(length(intervals), 'weekend'))</span></p>
+<p class="p3"><span class="s1">names(weekdays)[2:3] &lt;- c('mean','dayType')</span></p>
+<p class="p3"><span class="s1">names(weekends)[2:3] &lt;- c('mean','dayType')</span></p>
+<p class="p3"><span class="s1">aux &lt;- rbind(weekdays, weekends)</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"># This function installs the ggplot2 library if not available on the running</span></p>
+<p class="p3"><span class="s1"># environment, whichever the case the includes it in to the libraries pack</span></p>
+<p class="p3"><span class="s1">pkgReady &lt;- function(pkgName) is.element(pkgName, installed.packages()[,1])</span></p>
+<p class="p3"><span class="s1">if(!pkgReady('ggplot2')){install.packages('ggplot2')}</span></p>
+<p class="p3"><span class="s1">library(ggplot2)</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1">#Plot Time series of interval and the average number of steps, across all days</span></p>
+<p class="p3"><span class="s1">qplot(x=intervals, y=mean, data=aux, geom=c('path','smooth'), color=intervals,</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>facets = dayType ~ .)</span></p>
+<p class="p6"><span class="s1"><img src="file:///unknown_3.png" alt="unknown_3.png"></span></p>
+</body>
+</html>
