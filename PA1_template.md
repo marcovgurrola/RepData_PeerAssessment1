@@ -30,7 +30,7 @@ print(paste('Data file read at: ', Sys.time(), sep = ''))
 ```
 
 ```
-## [1] "Data file read at: 2016-01-26 23:11:54"
+## [1] "Data file read at: 2016-01-27 02:02:08"
 ```
 
 ```r
@@ -43,6 +43,7 @@ procData <- rawData[good,]
 # Discard the dates (factors) with no step data
 procData$date <- factor(procData$date)
 ```
+
 
 ## What is mean total number of steps taken per day?
 
@@ -72,7 +73,7 @@ with(dailySteps, hist(x=date, main = 'Density of Total Steps per Day',
   density=NULL)
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)
+![](PA1_template_files/figure-html/steps_day-1.png)
 
 ```r
 # Computation of means and medians per day
@@ -201,6 +202,7 @@ print(as.data.frame(medians))
 ## 2012-11-29       0
 ```
 
+
 ## What is the average daily activity pattern?
 
 ```r
@@ -237,22 +239,16 @@ aux <- summarise(aux, average = mean(steps))
 
 # Plot, time series of interval and average number of steps, across all days
 with(aux, plot(interval, average, type="l", xlab = 'Intervals',
-  ylab = 'Average Steps'))
+  ylab = 'Average Steps', main = 'Average Steps per Interval, all dates'))
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)
+![](PA1_template_files/figure-html/steps_interval-1.png)
+
+#### Max. number of steps (average) on a Interval
 
 ```r
 # Interval across all days in the dataset with maximum number of steps -average
 maxStepsAvg <- filter(aux, average == max(average))
-print('Max. number of steps (average) per day and its interval:')
-```
-
-```
-## [1] "Max. number of steps (average) per day and its interval:"
-```
-
-```r
 print(maxStepsAvg)
 ```
 
@@ -267,15 +263,18 @@ print(maxStepsAvg)
 
 ## Imputing missing values
 
+#### Total number of missing values
+
 ```r
 # Calculate and report the total number of missing values in the dataset
 missNum = as.numeric(length(good[good == F]))
-print(paste('Total number of missing values:', missNum, sep = ' '))
+print(missNum)
 ```
 
 ```
-## [1] "Total number of missing values: 2304"
+## [1] 2304
 ```
+
 
 ```r
 # Fill in all of the missing values with the mean for that 5-minute interval
@@ -322,7 +321,7 @@ with(dailySteps, hist(x=date, main = 'Density of Total Steps per Day No NA',
   density=NULL)
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)
+![](PA1_template_files/figure-html/imput_nas-1.png)
 
 ```r
 # Computation of means and medians per day
@@ -466,38 +465,12 @@ print(as.data.frame(medians))
 ## 2012-11-29  0.00000
 ## 2012-11-30 34.11321
 ```
+#### - These values differ from the ones of the first part of the assignment
+####   since filling the missing values with Mean Avgs caused an increment on
+####   the total steps per day.
+#### - The Medians suffered alterations as well, since we had 0s passing the
+####   middle, now we have some means instead.
 
-```r
-print('These values differ from the ones of the first part of the assignment.')
-```
-
-```
-## [1] "These values differ from the ones of the first part of the assignment."
-```
-
-```r
-print('By filling the NAs the total steps per day increased for some days')
-```
-
-```
-## [1] "By filling the NAs the total steps per day increased for some days"
-```
-
-```r
-print('The Medians suffered alterations as well, since we had 0s passing the')
-```
-
-```
-## [1] "The Medians suffered alterations as well, since we had 0s passing the"
-```
-
-```r
-print('middle, now we have some means instead.')
-```
-
-```
-## [1] "middle, now we have some means instead."
-```
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -541,16 +514,12 @@ if(!pkgReady('ggplot2')){install.packages('ggplot2')}
 library(ggplot2)
 
 #Plot Time series of interval and the average number of steps, across all days
-qplot(x=intervals, y=mean, data=aux, geom=c('path','smooth'), color=intervals,
-  facets = dayType ~ .)
+p = qplot(x=intervals, y=mean, data=aux, geom=c('path','smooth'), color=intervals,
+      facets = dayType ~ ., main = 'Weekday vs Weekend Activity')
+print(p)
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)
+![](PA1_template_files/figure-html/panel_daysType-1.png)
 
-```r
-print('We can observe enough differences on the average means per interval')
-```
-
-```
-## [1] "We can observe enough differences on the average means per interval"
-```
+#### We can observe enough differences on the average means per interval
+#### between weekday and weekend activities

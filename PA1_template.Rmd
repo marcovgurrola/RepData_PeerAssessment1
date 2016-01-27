@@ -6,7 +6,7 @@ output:
 ---
 
 ## Loading and preprocessing the data
-```{r, echo = TRUE}
+```{r load_preprocess, echo = TRUE}
 # Get current working directory
 myPath <- getwd()
 
@@ -42,8 +42,9 @@ procData <- rawData[good,]
 procData$date <- factor(procData$date)
 ```
 
+
 ## What is mean total number of steps taken per day?
-```{r, echo = TRUE}
+```{r steps_day, echo = TRUE}
 # Only step and date columns are required
 steps <- procData[,1:2]
 
@@ -77,8 +78,9 @@ print(as.data.frame(means))
 print(as.data.frame(medians))
 ```
 
+
 ## What is the average daily activity pattern?
-```{r, echo = TRUE}
+```{r steps_interval, echo = TRUE}
 # This function installs the dplyr library if not available on the running
 # environment, whichever the case the includes it in to the libraries pack
 pkgReady <- function(pkgName) is.element(pkgName, installed.packages()[,1])
@@ -93,21 +95,27 @@ aux <- summarise(aux, average = mean(steps))
 
 # Plot, time series of interval and average number of steps, across all days
 with(aux, plot(interval, average, type="l", xlab = 'Intervals',
-  ylab = 'Average Steps'))
+  ylab = 'Average Steps', main = 'Average Steps per Interval, all dates'))
+```
 
+#### Max. number of steps (average) on a Interval
+```{r max_num_steps_out, echo = TRUE}
 # Interval across all days in the dataset with maximum number of steps -average
 maxStepsAvg <- filter(aux, average == max(average))
-print('Max. number of steps (average) per day and its interval:')
 print(maxStepsAvg)
 ```
 
 
 ## Imputing missing values
-```{r, echo = TRUE}
+
+#### Total number of missing values
+```{r miss_val_num, echo = TRUE}
 # Calculate and report the total number of missing values in the dataset
 missNum = as.numeric(length(good[good == F]))
-print(paste('Total number of missing values:', missNum, sep = ' '))
+print(missNum)
+```
 
+```{r imput_nas, echo = TRUE}
 # Fill in all of the missing values with the mean for that 5-minute interval
 aux <- tapply(procData$steps, procData$interval, mean)
 
@@ -158,16 +166,17 @@ medians <- tapply(newRaw$steps, newRaw$date, median)
 # Format objects for better visualization
 print(as.data.frame(means))
 print(as.data.frame(medians))
-
-print('These values differ from the ones of the first part of the assignment.')
-print('By filling the NAs the total steps per day increased for some days')
-print('The Medians suffered alterations as well, since we had 0s passing the')
-print('middle, now we have some means instead.')
 ```
+#### - These values differ from the ones of the first part of the assignment
+####   since filling the missing values with Mean Avgs caused an increment on
+####   the total steps per day.
+#### - The Medians suffered alterations as well, since we had 0s passing the
+####   middle, now we have some means instead.
+
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r, echo = TRUE}
+```{r panel_daysType, echo = TRUE}
 #Create a factor with two levels -- "weekday" and "weekend"
 wd <- weekdays(as.Date(newRaw$date, format = '%Y-%m-%d'), abbreviate = T)
 wd <- data.frame(sapply (wd, function(x) {
@@ -206,8 +215,10 @@ if(!pkgReady('ggplot2')){install.packages('ggplot2')}
 library(ggplot2)
 
 #Plot Time series of interval and the average number of steps, across all days
-qplot(x=intervals, y=mean, data=aux, geom=c('path','smooth'), color=intervals,
-  facets = dayType ~ .)
-
-print('We can observe enough differences on the average means per interval')
+p = qplot(x=intervals, y=mean, data=aux, geom=c('path','smooth'), color=intervals,
+      facets = dayType ~ ., main = 'Weekday vs Weekend Activity')
+print(p)
 ```
+
+#### We can observe enough differences on the average means per interval
+#### between weekday and weekend activities
