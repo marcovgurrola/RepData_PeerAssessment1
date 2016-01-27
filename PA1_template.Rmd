@@ -5,21 +5,207 @@ output:
     keep_md: true
 ---
 
-
 ## Loading and preprocessing the data
+```{r, echo = TRUE}
+# Get current working directory
+myPath <- getwd()
 
+# Create the full path for the csv file to be used
+filePath <- paste(myPath, 'activity.csv', sep = '/')
 
+# Download file in case it doesn't exist
+if(!file.exists(filePath)){
+  # From https://github.com/rdpeng/RepData_PeerAssessment1, Assigment section
+  url <- 'https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip'
+  
+  # Destination for the zip to download
+  zipPath <- 'activity.zip'
+  # Start downloading, inform date and time
+  print(paste('Download started at: ', Sys.time(), sep = ''))
+  download.file(url, zipPath, mode = 'wb')
+  
+  # Unzip the file into a csv
+  unzip(zipPath)
+}
+
+# Read csv file from local path and inform the date and time of access
+rawData <- read.csv(filePath)
+print(paste('Data file read at: ', Sys.time(), sep = ''))
+
+# Process the data into a format suitable, identify observations with step data
+good <- !is.na(rawData$steps)
+
+# Filter observations with step data (discard missing values)
+procData <- rawData[good,]
+
+# Discard the dates (factors) with no step data
+procData$date <- factor(procData$date)
+```
 
 ## What is mean total number of steps taken per day?
+```{r, echo = TRUE}
+# Only step and date columns are required
+steps <- procData[,1:2]
 
+# Order by date and steps for further median calculations
+steps<-steps[order(steps$date, steps$steps, decreasing = FALSE),]
 
+## Calculate the total number of steps taken per day
+steps <- tapply(steps$steps, steps$date, sum)
+# Storing the dates information
+dates <- row.names(steps)
+
+## Make a histogram of the total number of steps taken each day
+# Creating a suitable data.frame for a plot
+dailySteps<-data.frame(dates, as.vector(steps))
+names(dailySteps) <- c('date', 'steps')
+
+# Format date for X axis
+dailySteps$date = as.Date(dailySteps[,'date'], format = '%Y-%m-%d')
+
+# Plot
+with(dailySteps, hist(x=date, main = 'Density of Total Steps per Day',
+  col = c('lightgreen'), breaks = 10, ylab = 'Steps', xlab = '2012', freq = F),
+  density=NULL)
+
+# Computation of means and medians per day
+means <- tapply(procData$steps, procData$date, mean)
+medians <- tapply(procData$steps, procData$date, median)
+
+# Format objects for better visualization
+print(as.data.frame(means))
+print(as.data.frame(medians))
+```
 
 ## What is the average daily activity pattern?
+```{r, echo = TRUE}
+# This function installs the dplyr library if not available on the running
+# environment, whichever the case the includes it in to the libraries pack
+pkgReady <- function(pkgName) is.element(pkgName, installed.packages()[,1])
+if(!pkgReady('dplyr')){install.packages('dplyr')}
+library(dplyr)
 
+# Group data by intervals
+aux <- group_by(procData, interval)
+
+# Calculate average number of steps accross all days
+aux <- summarise(aux, average = mean(steps))
+
+# Plot, time series of interval and average number of steps, across all days
+with(aux, plot(interval, average, type="l", xlab = 'Intervals',
+  ylab = 'Average Steps'))
+
+# Interval across all days in the dataset with maximum number of steps -average
+maxStepsAvg <- filter(aux, average == max(average))
+print('Max. number of steps (average) per day and its interval:')
+print(maxStepsAvg)
+```
 
 
 ## Imputing missing values
+```{r, echo = TRUE}
+# Calculate and report the total number of missing values in the dataset
+missNum = as.numeric(length(good[good == F]))
+print(paste('Total number of missing values:', missNum, sep = ' '))
 
+# Fill in all of the missing values with the mean for that 5-minute interval
+aux <- tapply(procData$steps, procData$interval, mean)
+
+# Format the column types and names for better handling
+aux <- data.frame(cbind(row.names(aux), as.numeric(aux)))
+names(aux) <- c('interval', 'mean')
+
+# Merge the raw data with the interval means to create a new dataset
+newRaw <- merge (rawData, aux, by = c('interval', 'interval'), all.x = T)
+newRaw <- newRaw[order(newRaw$date, newRaw$interval, decreasing = FALSE),]
+newRaw$mean <- as.numeric(levels(newRaw$mean))[newRaw$mean]
+
+# Create a new dataset that is equal to the original dataset but without NAs
+# Store the total number of observations 
+rQty = nrow(newRaw)
+# Replace every empty step with the mean
+for(i in 1:rQty){
+  if(is.na(newRaw$steps[i])){
+    newRaw$steps[i] = newRaw$mean[i]
+  }
+}
+
+# New Raw Data, trim the mean column to fully match the original data
+newRaw = newRaw[, c('steps', 'date','interval')]
+
+# Calculate the total number of steps taken per day
+dailySteps <- tapply(newRaw$steps, newRaw$date, sum)
+# Storing the dates information
+dates <- row.names(dailySteps)
+
+# Make a histogram of the total number of steps taken each day
+# Creating a suitable data.frame for a plot
+dailySteps <- data.frame(dates, as.vector(dailySteps))
+names(dailySteps) <- c('date', 'steps')
+
+# Format date for X axis
+dailySteps$date = as.Date(dailySteps[,'date'], format = '%Y-%m-%d')
+
+# Plot
+with(dailySteps, hist(x=date, main = 'Density of Total Steps per Day No NA',
+  col = c('lightgreen'), breaks = 10, ylab = 'Steps', xlab = '2012', freq = F),
+  density=NULL)
+
+# Computation of means and medians per day
+means <- tapply(newRaw$steps, newRaw$date, mean)
+medians <- tapply(newRaw$steps, newRaw$date, median)
+
+# Format objects for better visualization
+print(as.data.frame(means))
+print(as.data.frame(medians))
+
+print('These values differ from the ones of the first part of the assignment.')
+print('By filling the NAs the total steps per day increased for some days')
+print('The Medians suffered alterations as well, since we had 0s passing the')
+print('middle, now we have some means instead.')
+```
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+```{r, echo = TRUE}
+#Create a factor with two levels -- "weekday" and "weekend"
+wd <- weekdays(as.Date(newRaw$date, format = '%Y-%m-%d'), abbreviate = T)
+wd <- data.frame(sapply (wd, function(x) {
+  if(x %in% c('Mon', 'Tue', 'Wed', 'Thu', 'Fri')){
+    x = 'weekday'
+  }
+  else
+    x = 'weekend'
+}))
+names(wd) <- c('dayType')
+
+# Merge the new raw data with the names of the days (weekday, weekend)
+newRaw <- cbind(newRaw[,-2], wd[,1])
+names(newRaw)[3] <- 'dayType'
+
+# Separate dayTypes for means computations
+weekdays <- newRaw[newRaw$dayType == 'weekday',]
+weekends <- newRaw[newRaw$dayType == 'weekend',]
+
+# Compute Means
+weekdays <- tapply(weekdays$steps, weekdays$interval, mean)
+weekends <- tapply(weekends$steps, weekends$interval, mean)
+
+# Format computed data into a single data.frame
+intervals <- as.integer(row.names(weekdays))
+weekdays <- data.frame(intervals, weekdays, replicate(length(intervals), 'weekday'))
+weekends <- data.frame(intervals, weekends, replicate(length(intervals), 'weekend'))
+names(weekdays)[2:3] <- c('mean','dayType')
+names(weekends)[2:3] <- c('mean','dayType')
+aux <- rbind(weekdays, weekends)
+
+# This function installs the ggplot2 library if not available on the running
+# environment, whichever the case the includes it in to the libraries pack
+pkgReady <- function(pkgName) is.element(pkgName, installed.packages()[,1])
+if(!pkgReady('ggplot2')){install.packages('ggplot2')}
+library(ggplot2)
+
+#Plot Time series of interval and the average number of steps, across all days
+qplot(x=intervals, y=mean, data=aux, geom=c('path','smooth'), color=intervals,
+  facets = dayType ~ .)
+```
