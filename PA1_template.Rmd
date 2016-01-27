@@ -208,4 +208,6 @@ library(ggplot2)
 #Plot Time series of interval and the average number of steps, across all days
 qplot(x=intervals, y=mean, data=aux, geom=c('path','smooth'), color=intervals,
   facets = dayType ~ .)
+
+print('We can observe enough differences on the average means per interval')
 ```
